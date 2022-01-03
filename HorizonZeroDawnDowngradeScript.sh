@@ -3,21 +3,34 @@
 # If the directory below is wrong, get the right one by pressing "Settings -> Manage -> Browse local files" for Horizon Zero Dawn on Steam. Don't forget to put quotes around it.
 HORIZON_ZERO_DAWN_DIRECTORY="$HOME/.steam/debian-installation/steamapps/common/Horizon Zero Dawn"
 
+REQUIRED_APT_PACKAGES="wget unzip snapd"  # Used to store all tools needed from apt
+PACKAGES_TO_FETCH=""  # Used to store all tools that need to be installed, used, then removed.
+
 # Install required tools
 clear
-echo "If this script was not run as root your password may be required to install some tools."
-# Install wget to fetch depotDownloader
-sudo apt -y install wget
-echo "wget was installed via apt"
-# Install unzip to extract depotDownloader
-sudo apt -y install unzip
-echo "unzip was installed via apt"
-# Install snapd to install the dotnet-sdk
-sudo apt -y install snapd
-echo "snapd was installed via apt"
-# Install the dotnet-sdk to run the DepotDownloader.dll file
-sudo snap install dotnet-sdk --classic
-echo "dotnet-sdk was installed via snap"
+echo "Checking system for required tools..."
+
+# For every required package that is not installed, add it to PACKAGES_TO_FETCH.
+for PACKAGE in $REQUIRED_APT_PACKAGES
+do
+  if ! dpkg-query -W "$PACKAGE"  | grep "ok installed"
+  then
+    PACKAGES_TO_FETCH="$PACKAGES_TO_FETCH $PACKAGE"
+  fi
+done
+
+# If any packages are not installed, install them all in one go.
+if [ -z "$PACKAGES_TO_FETCH" ]
+then
+  sudo apt -y install $PACKAGES_TO_FETCH
+fi
+
+# Install the dotnet-sdk to run the DepotDownloader.dll file if it is not already there.
+DOTNET_SDK_INSTALLED=$(snap list | grep dotnet-sdk)
+if [ -z "$DOTNET_SDK_INSTALLED" ]
+then
+  sudo snap install dotnet-sdk --classic
+fi
 
 # Download DepotDownloader
 clear
@@ -39,21 +52,21 @@ echo "Packed_DX12/Patch.bin" >> 1151641.txt
 clear
 echo "Your Steam username and password as well as two-factor authentication are required to download from the depot."
 echo "Please input your Steam username."
-read -r username
+read -r USERNAME
 echo "Please input your Steam password. The console will not print anything but your keystrokes are being read."
 stty -echo
-read -r password
+read -r PASSWORD
 stty echo
 
 # Perform downloads
 clear
-sudo dotnet depotDownloader/DepotDownloader.dll -app 1151640 -depot 1151642 -manifest 2110572734960666938 -username "$username" -password "$password" -filelist 1151642.txt
-sudo dotnet depotDownloader/DepotDownloader.dll -app 1151640 -depot 1151641 -manifest 8564283306590138028 -username "$username" -password "$password" -filelist 1151641.txt
+sudo dotnet depotDownloader/DepotDownloader.dll -app 1151640 -depot 1151642 -manifest 2110572734960666938 -username "$USERNAME" -password "$PASSWORD" -filelist 1151642.txt
+sudo dotnet depotDownloader/DepotDownloader.dll -app 1151640 -depot 1151641 -manifest 8564283306590138028 -username "$USERNAME" -password "$PASSWORD" -filelist 1151641.txt
+chmod 777 depots
 
 # Copy files to Horizon Zero Dawn install directory
 clear
 echo "Copying files to Horizon Zero Dawn's install directory..."
-#sudo chown "$USER" depots
 cp depots/1151642/7874181/HorizonZeroDawn.exe "$HORIZON_ZERO_DAWN_DIRECTORY/HorizonZeroDawn.exe"
 cp -rT depots/1151641/7874181/LocalCacheDX12 "$HORIZON_ZERO_DAWN_DIRECTORY"/LocalCacheDX12
 cp -rT depots/1151641/7874181/Packed_DX12 "$HORIZON_ZERO_DAWN_DIRECTORY"/Packed_DX12
@@ -61,7 +74,19 @@ cp -rT depots/1151641/7874181/Packed_DX12 "$HORIZON_ZERO_DAWN_DIRECTORY"/Packed_
 # Clean up
 clear
 echo "Cleaning up..."
+
+# Remove files that are no longer needed.
 sudo rm -rf depotDownloader depots 1151641.txt 1151642.txt depotdownloader-2.4.5.zip
+
+# Uninstall packages that were installed by this script.
+if [ -z "$PACKAGES_TO_FETCH" ]
+then
+  sudo apt -y remove $PACKAGES_TO_FETCH
+fi
+if [ -z "$DOTNET_SDK_INSTALLED" ]
+then
+  sudo snap remove dotnet-sdk
+fi
 
 # Finish
 echo "Finished. Horizon Zero Dawn has been rolled back to the 1.10 hotfix patch."

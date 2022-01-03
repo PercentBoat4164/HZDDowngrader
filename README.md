@@ -14,8 +14,8 @@ To run this script:
 
 ### Restoring Horizon Zero Dawn to the latest version
 If you wish to restore Horizon Zero Dawn back to the latest version:
-1. Click Settings -> Properties under Horizon Zero Dawn's library page in Steam
-2. On the left of the window that appears click Local Files -> Verify integrity of game files...
+1. Click "Settings -> Properties" under Horizon Zero Dawn's library page in Steam.
+2. On the left of the window that appears click "Local Files -> Verify integrity of game files...".
 3. Wait for this process to finish, it may take a few minutes.
 
 *Voilà*, Horizon Zero Dawn is restored to the latest version. 
