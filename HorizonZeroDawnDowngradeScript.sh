@@ -1,8 +1,9 @@
 #!/bin/sh
 
-# If the directory below is wrong, get the right one by pressing "Settings -> Manage -> Browse local files" for Horizon Zero Dawn on Steam. Don't forget to put quotes around it.
-HORIZON_ZERO_DAWN_DIRECTORY="$HOME/.steam/debian-installation/steamapps/common/Horizon Zero Dawn"
+#todo Use snap for dotnet-runtime-60 instead of dotnet-sdk.
+#todo Use above change to not require any root permissions (unless a package must be fetched).
 
+HORIZON_ZERO_DAWN_DIRECTORY="$HOME/.steam/debian-installation/steamapps/common/Horizon Zero Dawn" # Default Horizon Zero Dawn install directory.
 REQUIRED_APT_PACKAGES="wget unzip snapd"  # Used to store all tools needed from apt
 PACKAGES_TO_FETCH=""  # Used to store all tools that need to be installed, used, then removed.
 
@@ -58,6 +59,15 @@ stty -echo
 read -r PASSWORD
 stty echo
 
+# Get real install directory if default install directory does not exist
+while [ ! -d "$HORIZON_ZERO_DAWN_DIRECTORY" ]
+do
+  echo "The directory $HORIZON_ZERO_DAWN_DIRECTORY does not exist."
+  echo "Please input the directory in which you installed Horizon Zero Dawn."
+  read -r HORIZON_ZERO_DAWN_DIRECTORY
+done
+echo "Using directory $HORIZON_ZERO_DAWN_DIRECTORY as Horizon Zero Dawn install directory."
+
 # Perform downloads
 clear
 sudo dotnet depotDownloader/DepotDownloader.dll -app 1151640 -depot 1151642 -manifest 2110572734960666938 -username "$USERNAME" -password "$PASSWORD" -filelist 1151642.txt
@@ -68,8 +78,8 @@ chmod 777 depots
 clear
 echo "Copying files to Horizon Zero Dawn's install directory..."
 cp depots/1151642/7874181/HorizonZeroDawn.exe "$HORIZON_ZERO_DAWN_DIRECTORY/HorizonZeroDawn.exe"
-cp -rT depots/1151641/7874181/LocalCacheDX12 "$HORIZON_ZERO_DAWN_DIRECTORY"/LocalCacheDX12
-cp -rT depots/1151641/7874181/Packed_DX12 "$HORIZON_ZERO_DAWN_DIRECTORY"/Packed_DX12
+cp -rT depots/1151641/7874181/LocalCacheDX12 "$HORIZON_ZERO_DAWN_DIRECTORY/LocalCacheDX12"
+cp -rT depots/1151641/7874181/Packed_DX12 "$HORIZON_ZERO_DAWN_DIRECTORY/Packed_DX12"
 
 # Clean up
 clear
@@ -89,4 +99,5 @@ then
 fi
 
 # Finish
+clear
 echo "Finished. Horizon Zero Dawn has been rolled back to the 1.10 hotfix patch."
