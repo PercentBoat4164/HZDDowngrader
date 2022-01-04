@@ -24,7 +24,7 @@ then
 fi
 
 # Install the dotnet-sdk to run the DepotDownloader.dll file if it is not already there.
-DOTNET_RUNTIME_INSTALLED=$(snap list | grep dotnet-sdk)
+DOTNET_RUNTIME_INSTALLED=$(snap list | grep dotnet-runtime-60)
 if [ -z "$DOTNET_RUNTIME_INSTALLED" ]
 then
   sudo snap install dotnet-runtime-60 --classic
