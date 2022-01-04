@@ -3,10 +3,11 @@ A bash shell script that downgrades Steam's Horizon Zero Dawn to the 1.10 Hotfix
 
 ### Running the script
 To run this script:
-1. Download the code, latest release file, or just the *.sh file.
-2. Open a terminal and naviagte to the location that you saved the file.
-3. Type in `bash HorizonZeroDawnDowngradeScript.sh`.
-4. Follow the on-screen instructions from there.
+1. Download the code, or the latest release file.
+2. Extract the *.sh file.
+3. Open a terminal and navigate to the location that you saved the file.
+4. Type in `bash HorizonZeroDawnDowngradeScript.sh`.
+5. Follow the on-screen instructions from there.
 
 ### Restoring Horizon Zero Dawn to the latest version
 If you wish to restore Horizon Zero Dawn back to the latest version:

@@ -1,8 +1,5 @@
 #!/bin/sh
 
-#todo Use snap for dotnet-runtime-60 instead of dotnet-sdk.
-#todo Use above change to not require any root permissions (unless a package must be fetched).
-
 HORIZON_ZERO_DAWN_DIRECTORY="$HOME/.steam/debian-installation/steamapps/common/Horizon Zero Dawn" # Default Horizon Zero Dawn install directory.
 REQUIRED_APT_PACKAGES="wget unzip snapd"  # Used to store all tools needed from apt
 PACKAGES_TO_FETCH=""  # Used to store all tools that need to be installed, used, then removed.
@@ -27,10 +24,10 @@ then
 fi
 
 # Install the dotnet-sdk to run the DepotDownloader.dll file if it is not already there.
-DOTNET_SDK_INSTALLED=$(snap list | grep dotnet-sdk)
-if [ -z "$DOTNET_SDK_INSTALLED" ]
+DOTNET_RUNTIME_INSTALLED=$(snap list | grep dotnet-sdk)
+if [ -z "$DOTNET_RUNTIME_INSTALLED" ]
 then
-  sudo snap install dotnet-sdk --classic
+  sudo snap install dotnet-runtime-60 --classic
 fi
 
 # Download DepotDownloader
@@ -70,9 +67,8 @@ echo "Using directory $HORIZON_ZERO_DAWN_DIRECTORY as Horizon Zero Dawn install 
 
 # Perform downloads
 clear
-sudo dotnet depotDownloader/DepotDownloader.dll -app 1151640 -depot 1151642 -manifest 2110572734960666938 -username "$USERNAME" -password "$PASSWORD" -filelist 1151642.txt
-sudo dotnet depotDownloader/DepotDownloader.dll -app 1151640 -depot 1151641 -manifest 8564283306590138028 -username "$USERNAME" -password "$PASSWORD" -filelist 1151641.txt
-chmod 777 depots
+dotnet-runtime-60.dotnet depotDownloader/DepotDownloader.dll -app 1151640 -depot 1151642 -manifest 2110572734960666938 -username "$USERNAME" -password "$PASSWORD" -filelist 1151642.txt
+dotnet-runtime-60.dotnet depotDownloader/DepotDownloader.dll -app 1151640 -depot 1151641 -manifest 8564283306590138028 -username "$USERNAME" -password "$PASSWORD" -filelist 1151641.txt
 
 # Copy files to Horizon Zero Dawn install directory
 clear
@@ -86,16 +82,16 @@ clear
 echo "Cleaning up..."
 
 # Remove files that are no longer needed.
-sudo rm -rf depotDownloader depots 1151641.txt 1151642.txt depotdownloader-2.4.5.zip
+rm -rf depotDownloader depots 1151641.txt 1151642.txt depotdownloader-2.4.5.zip
 
 # Uninstall packages that were installed by this script.
 if [ -z "$PACKAGES_TO_FETCH" ]
 then
   sudo apt -y remove $PACKAGES_TO_FETCH
 fi
-if [ -z "$DOTNET_SDK_INSTALLED" ]
+if [ -z "$DOTNET_RUNTIME_INSTALLED" ]
 then
-  sudo snap remove dotnet-sdk
+  sudo snap remove dotnet-runtime-60
 fi
 
 # Finish
